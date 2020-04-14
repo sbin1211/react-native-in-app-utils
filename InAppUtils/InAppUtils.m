@@ -221,6 +221,23 @@ RCT_EXPORT_METHOD(refreshReceipt:(BOOL)testExpired
     }
 }
 
+// Clears all transactions that are not in purchasing state
+RCT_EXPORT_METHOD(clearPendingTransactions:(RCTResponseSenderBlock)callback) {
+    NSArray *pendingTrans = [[SKPaymentQueue defaultQueue] transactions];
+    int transactionsCleared = 0;
+    for (int k = 0; k < pendingTrans.count; k++) {
+        SKPaymentTransaction *transaction = pendingTrans[k];
+        // Transactions in purchasing state cannot be cleared
+        if (transaction.transactionState != SKPaymentTransactionStatePurchasing) {
+            [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
+            transactionsCleared++;
+        }
+    }
+    
+    NSLog(@"cleared %i transactions", transactionsCleared);
+    callback(@[[NSNull null],[NSNumber numberWithInt:transactionsCleared]]);
+}
+
 RCT_EXPORT_METHOD(receiptData:(RCTResponseSenderBlock)callback)
 {
     NSURL *receiptUrl = [[NSBundle mainBundle] appStoreReceiptURL];
