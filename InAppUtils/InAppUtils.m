@@ -221,6 +221,16 @@ RCT_EXPORT_METHOD(refreshReceipt:(BOOL)testExpired
     }
 }
 
+- (NSString *)grandUnifiedReceipt
+{
+    NSURL *receiptUrl = [[NSBundle mainBundle] appStoreReceiptURL];
+    NSData *receiptData = [NSData dataWithContentsOfURL:receiptUrl];
+    if (!receiptData) {
+        return nil;
+    } else {
+        return [receiptData base64EncodedStringWithOptions:0];
+    }
+}
 // Clears all transactions that are not in purchasing state
 RCT_EXPORT_METHOD(clearPendingTransactions:(RCTResponseSenderBlock)callback) {
     NSArray *pendingTrans = [[SKPaymentQueue defaultQueue] transactions];
@@ -240,12 +250,11 @@ RCT_EXPORT_METHOD(clearPendingTransactions:(RCTResponseSenderBlock)callback) {
 
 RCT_EXPORT_METHOD(receiptData:(RCTResponseSenderBlock)callback)
 {
-    NSURL *receiptUrl = [[NSBundle mainBundle] appStoreReceiptURL];
-    NSData *receiptData = [NSData dataWithContentsOfURL:receiptUrl];
-    if (!receiptData) {
-      callback(@[@"not_available"]);
+    NSString *receipt = [self grandUnifiedReceipt];
+    if (receipt == nil) {
+        callback(@[@"not_available"]);
     } else {
-      callback(@[[NSNull null], [receiptData base64EncodedStringWithOptions:0]]);
+        callback(@[[NSNull null], receipt]);
     }
 }
 
@@ -294,7 +303,7 @@ RCT_EXPORT_METHOD(receiptData:(RCTResponseSenderBlock)callback)
                                                                                      @"transactionDate": @(transaction.transactionDate.timeIntervalSince1970 * 1000),
                                                                                      @"transactionIdentifier": transaction.transactionIdentifier,
                                                                                      @"productIdentifier": transaction.payment.productIdentifier,
-                                                                                     @"transactionReceipt": [[transaction transactionReceipt] base64EncodedStringWithOptions:0]
+                                                                                     @"transactionReceipt": [self grandUnifiedReceipt]
                                                                                      }];
     // originalTransaction is available for restore purchase and purchase of cancelled/expired subscriptions
     SKPaymentTransaction *originalTransaction = transaction.originalTransaction;
