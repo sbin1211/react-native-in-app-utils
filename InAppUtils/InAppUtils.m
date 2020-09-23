@@ -36,7 +36,7 @@ RCT_EXPORT_MODULE()
     for (SKPaymentTransaction *transaction in transactions) {
         switch (transaction.transactionState) {
             case SKPaymentTransactionStateFailed: {
-                NSString *key = RCTKeyForInstance(transaction.payment.productIdentifier);
+                NSString *key = transaction.payment.productIdentifier;
                 RCTResponseSenderBlock callback = _callbacks[key];
                 if (callback) {
                     callback(@[RCTJSErrorFromNSError(transaction.error)]);
@@ -48,7 +48,7 @@ RCT_EXPORT_MODULE()
                 break;
             }
             case SKPaymentTransactionStatePurchased: {
-                NSString *key = RCTKeyForInstance(transaction.payment.productIdentifier);
+                NSString *key = transaction.payment.productIdentifier;
                 RCTResponseSenderBlock callback = _callbacks[key];
                 if (callback) {
                     NSDictionary *purchase = [self getPurchaseData:transaction];
@@ -107,7 +107,7 @@ RCT_EXPORT_METHOD(purchaseProduct:(NSString *)productIdentifier
             payment.applicationUsername = username;
         }
         [[SKPaymentQueue defaultQueue] addPayment:payment];
-        _callbacks[RCTKeyForInstance(payment.productIdentifier)] = callback;
+        _callbacks[payment.productIdentifier] = callback;
     } else {
         callback(@[@"invalid_product"]);
     }

@@ -13,6 +13,6 @@ Pod::Spec.new do |s|
   s.source          = { :git => "https://github.com/chirag04/react-native-in-app-utils.git", :tag => "v#{s.version}" }
   s.source_files    = 'InAppUtils/*.{h,m}'
 
-  s.dependency 'React'
+  s.dependency 'React-Core'
 
 end
